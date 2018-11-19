@@ -35,14 +35,18 @@ jobs:
       # run tests!
       - run: ./gradlew build
       - run: cp ~/repo/build/libs/*.jar workspace
-
+      - persist_to_workspace:
+          root: workspace
+          path:
+            - *.jar
+            
   build-docker:
     docker:
       - image: quay.io/thoughtworks_aelab/di-circleci-platform-agent:3.8.23
         auth:
           username: $DOCKER_USER
           password: $QUAY_TOKEN
-          
+
     steps:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
