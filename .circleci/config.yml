@@ -37,9 +37,9 @@ jobs:
       - run: cp ~/repo/build/libs/*.jar workspace
       - persist_to_workspace:
           root: workspace
-          path:
-            - *.jar
-            
+          paths:
+            - customerservice-lastest.jar
+
   build-docker:
     docker:
       - image: quay.io/thoughtworks_aelab/di-circleci-platform-agent:3.8.23
