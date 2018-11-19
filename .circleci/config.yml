@@ -1,0 +1,67 @@
+version: 2
+jobs:
+  build-jar:
+    docker:
+      # specify the version you desire here
+      - image: circleci/openjdk:8-jdk
+
+    working_directory: ~/repo
+
+    environment:
+      # Customize the JVM maximum heap limit
+      JVM_OPTS: -Xmx3200m
+      TERM: dumb
+
+    steps:
+      - checkout
+      - run: mkdir -p workspace
+      # IMPORTANT - circleci needs the AWS credentials setup correctly
+      # with a user that can access the s3 bucket used for the maven dependencies
+
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "build.gradle" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run: ./gradlew dependencies
+
+      - save_cache:
+          paths:
+            - ~/.gradle
+          key: v1-dependencies-{{ checksum "build.gradle" }}
+
+      # run tests!
+      - run: ./gradlew build
+      - run: cp ~/repo/build/libs/*.jar workspace
+
+  build-docker:
+    docker:
+      - image: quay.io/thoughtworks_aelab/di-circleci-platform-agent:3.8.23
+        auth:
+          username: $DOCKER_USER
+          password: $QUAY_TOKEN
+    steps:
+      - attach_workspace:
+    steps:
+      - attach_workspace:
+          # Must be absolute path or relative path from working_directory
+          at: /tmp/workspace
+
+      - run: |
+          if [ -f `/tmp/workspace/customerservice-lastest.jar`]; then
+            echo "It worked!";
+          else
+            echo "Nope!"; exit 1
+          fi
+
+workflows:
+  version: 2
+
+  btd:
+    jobs:
+      - build-jar
+      - build-docker:
+          requires:
+            - build-jar
