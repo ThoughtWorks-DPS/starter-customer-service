@@ -42,8 +42,7 @@ jobs:
         auth:
           username: $DOCKER_USER
           password: $QUAY_TOKEN
-    steps:
-      - attach_workspace:
+          
     steps:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
