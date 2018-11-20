@@ -39,11 +39,10 @@ jobs:
       - persist_to_workspace:
           root: .
           paths:
+            - gradle.properties
             - build/libs
-            - .gradle
-            - gradlew
-            - gradle/*
             - Dockerfile
+            - k8
 
   build-docker:
     docker:
@@ -56,9 +55,9 @@ jobs:
     steps:
       - attach_workspace:
           at: ~/project
-          
-      - run: ls -l /root/project
-      - run: ./gradlew docker -PbuildNumber=$CIRCLE_BUILD_NUM
+      - run: echo 'export DOCKER_TAG="`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
+
+      - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG
 
 workflows:
   version: 2
