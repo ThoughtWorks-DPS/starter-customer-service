@@ -5,7 +5,7 @@ jobs:
       # specify the version you desire here
       - image: circleci/openjdk:8-jdk
 
-    working_directory: ~/repo
+    working_directory: ~/project
 
     environment:
       # Customize the JVM maximum heap limit
@@ -34,10 +34,11 @@ jobs:
 
       # run tests!
       - run: ./gradlew build
+      - run: cp ~/project/build/libs/*.jar workspace
       - persist_to_workspace:
-          root: workspace
-          paths:
-            - ~/repo/build/*
+          root: ~/project
+          path:
+            - .
 
   build-docker:
     docker:
@@ -45,14 +46,16 @@ jobs:
         auth:
           username: $DOCKER_USER
           password: $QUAY_TOKEN
+    working_directory: ~/project
 
     steps:
       - attach_workspace:
           # Must be absolute path or relative path from working_directory
-          at: /tmp/workspace
-
+          at: /root/project
+          
+      - run: ls -l /root/project
       - run: |
-          if [ -f 'build/libs/customerservice-lastest.jar' ]; then
+          if [ -f '/root/project/build/libs/customerservice-lastest.jar']; then
             echo "It worked!";
           else
             echo "Nope!"; exit 1
