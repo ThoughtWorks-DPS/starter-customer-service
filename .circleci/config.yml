@@ -4,10 +4,8 @@ jobs:
     docker:
       # specify the version you desire here
 #      - image: circleci/openjdk:8-jdk
-      - image: quay.io/thoughtworks_aelab/di-circleci-platform-agent:3.8.23
-        auth:
-          username: $DOCKER_USER
-          password: $QUAY_TOKEN
+      - image: image: circleci/openjdk:8-jdk
+
     working_directory: ~/project
 
     environment:
