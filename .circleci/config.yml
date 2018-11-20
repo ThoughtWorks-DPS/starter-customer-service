@@ -1,10 +1,13 @@
 version: 2
 jobs:
-  build-jar:
+  build:
     docker:
       # specify the version you desire here
-      - image: circleci/openjdk:8-jdk
-
+#      - image: circleci/openjdk:8-jdk
+      - image: quay.io/thoughtworks_aelab/di-circleci-platform-agent:3.8.23
+        auth:
+          username: $DOCKER_USER
+          password: $QUAY_TOKEN
     working_directory: ~/project
 
     environment:
@@ -35,6 +38,10 @@ jobs:
 
       # run tests!
       - run: ./gradlew build
+      - run: echo 'export DOCKER_TAG="`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
+      # since we made the Dockerfile easy to work with locally with Gradle we need to set the
+      # JAR_FILE arg in the docker build command
+      - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG .
 
       - persist_to_workspace:
           root: .
@@ -44,9 +51,9 @@ jobs:
             - Dockerfile
             - k8
 
-  build-docker:
+  build:
     docker:
-      - image: quay.io/thoughtworks_aelab/di-circleci-platform-agent:3.8.23
+      - image: quay.io/feedyard/circleci-base-agent:latest
         auth:
           username: $DOCKER_USER
           password: $QUAY_TOKEN
@@ -56,9 +63,10 @@ jobs:
       - attach_workspace:
           at: ~/project
       - run: echo 'export DOCKER_TAG="`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
-
+      # since we made the Dockerfile easy to work with locally with Gradle we need to set the
+      # JAR_FILE arg in the docker build command
       - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG .
-
+      - run: docker images
 workflows:
   version: 2
 
