@@ -53,12 +53,7 @@ jobs:
           at: ~/project
           
       - run: ls -l /root/project
-      - run: |
-          if [ -f '/root/project/build/libs/customerservice-lastest.jar']; then
-            echo "It worked!";
-          else
-            echo "Nope!"; exit 1
-          fi
+      - run: ./gradlew docker -PbuildNumber=$CIRCLE_BUILD_NUM
 
 workflows:
   version: 2
