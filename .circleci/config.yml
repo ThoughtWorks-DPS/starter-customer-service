@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  build-jar:
     docker:
       # specify the version you desire here
 #      - image: circleci/openjdk:8-jdk
@@ -51,7 +51,7 @@ jobs:
             - Dockerfile
             - k8
 
-  build:
+  build-docker:
     docker:
       - image: quay.io/feedyard/circleci-base-agent:latest
         auth:
