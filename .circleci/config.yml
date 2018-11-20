@@ -57,7 +57,7 @@ jobs:
           at: ~/project
       - run: echo 'export DOCKER_TAG="`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
 
-      - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG
+      - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG .
 
 workflows:
   version: 2
