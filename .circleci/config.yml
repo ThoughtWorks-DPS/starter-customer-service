@@ -14,7 +14,8 @@ jobs:
 
     steps:
       - checkout
-      - run: mkdir -p workspace
+      - attach_workspace:
+          at: ~/project
       # IMPORTANT - circleci needs the AWS credentials setup correctly
       # with a user that can access the s3 bucket used for the maven dependencies
 
@@ -34,11 +35,10 @@ jobs:
 
       # run tests!
       - run: ./gradlew build
-      - run: cp ~/project/build/libs/*.jar workspace
+
       - persist_to_workspace:
-          root: ~/project
-          path:
-            - .
+          root: .
+          paths: build/libs
 
   build-docker:
     docker:
@@ -50,8 +50,7 @@ jobs:
 
     steps:
       - attach_workspace:
-          # Must be absolute path or relative path from working_directory
-          at: /root/project
+          at: ~/project
           
       - run: ls -l /root/project
       - run: |
