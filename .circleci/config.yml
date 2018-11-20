@@ -38,7 +38,12 @@ jobs:
 
       - persist_to_workspace:
           root: .
-          paths: build/libs
+          paths:
+            - build/libs
+            - .gradle
+            - gradlew
+            - gradle/*
+            - Dockerfile
 
   build-docker:
     docker:
