@@ -62,7 +62,7 @@ jobs:
     # decrypt the gcloud secret and set the kubectl context
       - run: k8/create-kubectl-context.sh
     # docker login
-      - run: docker login -u="$DOCKER_USER" -p="$$QUAY_TOKEN" quay.io
+      - run: docker login -u="$DOCKER_USER" -p="$QUAY_TOKEN" quay.io
     # don't forget this step :-) Or you will not have a running docker daemon in you
     # build agent, DAMHIKT!
       - setup_remote_docker
