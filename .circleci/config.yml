@@ -37,7 +37,7 @@ jobs:
       - persist_to_workspace:
           root: workspace
           paths:
-            - build/*
+            - ~/repo/build/*
 
   build-docker:
     docker:
