@@ -58,6 +58,7 @@ jobs:
     working_directory: ~/project
 
     steps:
+      - setup_remote_docker
       - attach_workspace:
           at: ~/project
       - run: echo 'export DOCKER_TAG="`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
