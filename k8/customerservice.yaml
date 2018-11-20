@@ -21,13 +21,13 @@ spec:
     metadata:
       labels:
         app: customerservice
-        version: v1
+        version: v<VERSION>
     spec:
       imagePullSecrets:
       - name: thoughtworks-aelab-di-circleci-quayio-deploy-user-pull-secret
       containers:
       - name: service
-        image: quay.io/thoughtworks_aelab/customerservice:0.0.4
+        image: quay.io/thoughtworks_aelab/customerservice:<DOCKER_TAG>
         imagePullPolicy: Always
         env:
           - name: NODE_NAME

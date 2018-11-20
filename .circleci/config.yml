@@ -39,7 +39,7 @@ jobs:
       - run: echo 'export DOCKER_TAG="`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
       # since we made the Dockerfile easy to work with locally with Gradle we need to set the
       # JAR_FILE arg in the docker build command
-      
+
       - persist_to_workspace:
           root: .
           paths:
@@ -57,14 +57,26 @@ jobs:
     working_directory: ~/project
 
     steps:
+    # decrypt the gcloud secret and set the kubectl context
+      - run: k8/create-kubectl-context.sh
+
+    # don't forget this step :-) Or you will not have a running docker daemon in you
+    # build agent, DAMHIKT!
       - setup_remote_docker
       - attach_workspace:
           at: ~/project
-      - run: echo 'export DOCKER_TAG="`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
+      - run: echo 'export SERVICE_VERSION="`grep 'version' gradle.properties|cut -d'=' -f2`" > $BASH_ENV
+      - run: echo 'export DOCKER_TAG="$SERVICE_VERSION-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
       # since we made the Dockerfile easy to work with locally with Gradle we need to set the
       # JAR_FILE arg in the docker build command
       - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG .
-      - run: docker images
+      - run: docker push quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG
+      # setup final deployment file
+      - run: sed 's/\<DOCKER_TAG\>/$DOCKER_TAG/' k8/customerservice.yaml | sed 's/\<VERSION\>/$SERVICE_VERSION/' > k8/customerservice-final.yaml
+      - run: cat k8/customerservice-final.yaml
+      # deploy
+      - run: kubectl apply -f k8/customerservice-final.yaml
+
 workflows:
   version: 2
 
