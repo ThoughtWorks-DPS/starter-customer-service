@@ -82,7 +82,7 @@ jobs:
       - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG .
       - run: docker push quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG
       # setup final deployment file
-      - run: sed "s/\<DOCKER_TAG\>/$DOCKER_TAG/" k8/customerservice.yaml | sed "s/\<VERSION\>/$SERVICE_VERSION/" > k8/customerservice-final.yaml
+      - run: sed "s/{DOCKER_TAG}/$DOCKER_TAG/" k8/customerservice-template.yaml | sed "s/{VERSION}/$SERVICE_VERSION/" > k8/customerservice-final.yaml
       - run: cat k8/customerservice-final.yaml
       # deploy
       - run: kubectl apply -f k8/customerservice-final.yaml
