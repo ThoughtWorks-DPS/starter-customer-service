@@ -68,7 +68,7 @@ jobs:
 
       - run: gcloud auth activate-service-account k8starter-cluster-dev-admin@twdps-k8-starter.iam.gserviceaccount.com --key-file=gcloud-service-account.json
       - run: rm -f gcloud-service-account.json
-      - run: gcloud components install beta --quiet
+#      - run: gcloud components install beta --quiet
     # decrypt the gcloud secret and set the kubectl context
       - run: k8/create-kubectl-context.sh
 
