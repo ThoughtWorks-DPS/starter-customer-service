@@ -1,20 +1,37 @@
 version: 2
+
+defaults: &defaults
+  working_directory: ~/project
+  environment:
+    JVM_OPTS: -Xmx3200m
+    TERM: dumb
+    JAVA_CONTAINER: circleci/openjdk:8-jdk
+    INFRA_CONTAINER: quay.io/thoughtworks_aelab/di-circleci-platform-agent:latest
+
+exports: &exports
+  - run: |
+      SERVICE_VERSION=`grep 'version' gradle.properties|cut -d'=' -f2`
+      DOCKER_TAG=${SERVICE_VERSION}-${CIRCLE_BUILD_NUM}
+      echo "export SERVICE_VERSION=$SERVICE_VERSION" >> $BASH_ENV
+      echo "export DOCKER_TAG=$DOCKER_TAG" >> $BASH_ENV
+
+setup_infra: &setup_infra
+  # decrypt the gcloud secret and set the kubectl context
+  - run: k8/create-gcloud-kubectl-context.sh
+# docker login
+  - run: docker login -u="$DOCKER_USER" -p="$QUAY_TOKEN" quay.io
+
 jobs:
   build-jar:
+    <<: *defaults
     docker:
       # specify the version you desire here
 #      - image: circleci/openjdk:8-jdk
-      - image: circleci/openjdk:8-jdk
-
-    working_directory: ~/project
-
-    environment:
-      # Customize the JVM maximum heap limit
-      JVM_OPTS: -Xmx3200m
-      TERM: dumb
+      - image: $JAVA_CONTAINER
 
     steps:
       - checkout
+#      - <<: *exports
       - attach_workspace:
           at: ~/project
       # IMPORTANT - circleci needs the AWS credentials setup correctly
@@ -50,72 +67,47 @@ jobs:
             - gcloud-secret
 
   build-docker:
+    <<: *defaults
+
     docker:
-      - image: quay.io/thoughtworks_aelab/di-circleci-platform-agent:latest
+      - image: $INFRA_CONTAINER
         auth:
           username: $DOCKER_USER
           password: $QUAY_TOKEN
-    working_directory: ~/project
 
     steps:
+      - setup_remote_docker
+      - <<: *exports
       - attach_workspace:
           at: ~/project
-    # don't forget this step :-) Or you will not have a running docker daemon in you
-    # build agent, DAMHIKT!
-      - setup_remote_docker
 
-      - run: openssl aes-256-cbc -d -in gcloud-secret -k $KEY > gcloud-service-account.json
+      - <<: *setup_infra
 
-      - run: gcloud auth activate-service-account k8starter-cluster-dev-admin@twdps-k8-starter.iam.gserviceaccount.com --key-file=gcloud-service-account.json
-      - run: rm -f gcloud-service-account.json
-#      - run: gcloud components install beta --quiet
-    # decrypt the gcloud secret and set the kubectl context
-      - run: k8/create-kubectl-context.sh
-
-    # docker login
-      - run: docker login -u="$DOCKER_USER" -p="$QUAY_TOKEN" quay.io
-
-      - run: |
-          SERVICE_VERSION=`grep 'version' gradle.properties|cut -d'=' -f2`
-          DOCKER_TAG=${SERVICE_VERSION}-${CIRCLE_BUILD_NUM}
-          echo "export SERVICE_VERSION=$SERVICE_VERSION" >> $BASH_ENV
-          echo "export DOCKER_TAG=$DOCKER_TAG" >> $BASH_ENV
-          echo "export SERVICE_VERSION=$SERVICE_VERSION" >> shared_env
-          echo "export DOCKER_TAG=$DOCKER_TAG" >> shared_env
-          cat shared_env
       # since we made the Dockerfile easy to work with locally with Gradle we need to set the
       # JAR_FILE arg in the docker build command
       - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG .
       - run: docker push quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG
-      - persist_to_workspace:
-          root: .
-          paths:
-            - shared_env
+#      - persist_to_workspace:
+#          root: .
+#          paths:
+#            - shared_env
 
   deploy-service:
+    <<: *defaults
+
     docker:
-      - image: quay.io/thoughtworks_aelab/di-circleci-platform-agent:latest
+      - image: $INFRA_CONTAINER
         auth:
           username: $DOCKER_USER
           password: $QUAY_TOKEN
 
-    working_directory: ~/project
-
     steps:
+      - setup_remote_docker
+      - <<: *exports
       - attach_workspace:
           at: ~/project
-    # don't forget this step :-) Or you will not have a running docker daemon in you
-    # build agent, DAMHIKT!
-      - setup_remote_docker
-      # did the file not make it?
-      - run: cat shared_env
-      - run: cat shared_env >> $BASH_ENV
-      - run: openssl aes-256-cbc -d -in gcloud-secret -k $KEY > gcloud-service-account.json
-      - run: gcloud auth activate-service-account k8starter-cluster-dev-admin@twdps-k8-starter.iam.gserviceaccount.com --key-file=gcloud-service-account.json
-      - run: rm -f gcloud-service-account.json
-#      - run: gcloud components install beta --quiet
-    # decrypt the gcloud secret and set the kubectl context
-      - run: k8/create-kubectl-context.sh
+
+      - <<: *setup_infra
 
       # setup final deployment file
 
