@@ -76,8 +76,8 @@ jobs:
       - run: docker login -u="$DOCKER_USER" -p="$QUAY_TOKEN" quay.io
 
       - run: |
-          SERVICE_VERSION =`grep 'version' gradle.properties|cut -d'=' -f2`
-          DOCKER_TAG = $SERVICE_VERSION-$CIRCLE_BUILD_NUM
+          SERVICE_VERSION=`grep 'version' gradle.properties|cut -d'=' -f2`
+          DOCKER_TAG=${SERVICE_VERSION}-${CIRCLE_BUILD_NUM}
           echo "export SERVICE_VERSION=$SERVICE_VERSION" >> $BASH_ENV
           echo "export DOCKER_TAG=$DOCKER_TAG" >> $BASH_ENV
           echo "export SERVICE_VERSION=$SERVICE_VERSION" >> shared_env
