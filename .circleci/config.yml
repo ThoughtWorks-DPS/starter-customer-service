@@ -67,9 +67,8 @@ jobs:
     # docker login
       - run: docker login -u="$DOCKER_USER" -p="$QUAY_TOKEN" quay.io
 
-
-      - run: echo 'export SERVICE_VERSION="`grep 'version' gradle.properties|cut -d'=' -f2`' >> $BASH_ENV
-      - run: echo 'export DOCKER_TAG="$SERVICE_VERSION-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
+      - run: echo "export SERVICE_VERSION=`grep 'version' gradle.properties|cut -d'=' -f2`" >> $BASH_ENV
+      - run: echo "export DOCKER_TAG=$SERVICE_VERSION-$CIRCLE_BUILD_NUM" >> $BASH_ENV
       # since we made the Dockerfile easy to work with locally with Gradle we need to set the
       # JAR_FILE arg in the docker build command
       - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG .
