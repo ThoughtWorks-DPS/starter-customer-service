@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		springBootVersion = '2.0.5.RELEASE'
+		springBootVersion = '2.0.6.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -25,15 +25,15 @@ group = 'io.twdps.starter'
 sourceCompatibility = 1.8
 
 repositories {
-//	mavenLocal()
+	mavenLocal()
 
 	mavenCentral()
-	maven {
-		url "s3://maven.k8starter.twdps.io/release/"
-		authentication {
-			awsIm(AwsImAuthentication) // load from EC2 role or env var
-		}
-	}
+//	maven {
+//		url "s3://maven.k8starter.twdps.io/release/"
+//		authentication {
+//			awsIm(AwsImAuthentication) // load from EC2 role or env var
+//		}
+//	}
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -67,9 +67,9 @@ dependencies {
 	compile 'net.logstash.logback:logstash-logback-encoder:5.1'
 	compile 'io.opentracing.contrib:opentracing-spring-cloud-starter:0.1.15'
 	compile 'io.jaegertracing:jaeger-client:0.30.4'
-	compile 'io.twdps.starter.errors:error-handling:0.0.1'
-	compile 'io.twdps.starter.errors:exceptions:0.0.1'
-	compile 'io.twdps.starter.logging:logger:0.0.1'
+	compile 'io.twdps.starter.errors:error-handling:0.0.2'
+	compile 'io.twdps.starter.errors:exceptions:0.0.2'
+	compile 'io.twdps.starter.logging:logger:0.0.2'
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	runtime 'io.micrometer:micrometer-registry-prometheus:1.0.4'
 	testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'
