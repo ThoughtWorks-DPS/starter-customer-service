@@ -47,6 +47,7 @@ jobs:
             - build/libs
             - Dockerfile
             - k8
+            - gcloud-secret
 
   build-docker:
     docker:
@@ -62,11 +63,15 @@ jobs:
     # don't forget this step :-) Or you will not have a running docker daemon in you
     # build agent, DAMHIKT!
       - setup_remote_docker
+
+      - run: openssl aes-256-cbc -d -in ../gcloud-secret -k $KEY > gcloud-service-account.json
+
+      - run: gcloud auth activate-service-account k8starter-cluster-dev-admin@twdps-k8-starter.iam.gserviceaccount.com --key-file=gcloud-service-account.json
+      - run: rm -f gcloud-service-account.json
+      - run: gcloud components install beta --quiet
     # decrypt the gcloud secret and set the kubectl context
       - run: k8/create-kubectl-context.sh
 
-    # install the rest of the gcloud tools (or just kubectl?)
-      - run: gcloud components install alpha --quiet
     # docker login
       - run: docker login -u="$DOCKER_USER" -p="$QUAY_TOKEN" quay.io
 
