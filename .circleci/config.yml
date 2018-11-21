@@ -7,7 +7,8 @@ defaults: &defaults
     TERM: dumb
     JAVA_CONTAINER: circleci/openjdk:8-jdk
     INFRA_CONTAINER: quay.io/thoughtworks_aelab/di-circleci-platform-agent:latest
-
+    GCLOUD_PROJECT_ID: twdps-k8-starter
+    GKE_CLUSTER_NAME: k8startercluster
 exports: &exports
   - run: |
       SERVICE_VERSION=`grep 'version' gradle.properties|cut -d'=' -f2`
@@ -16,10 +17,9 @@ exports: &exports
       echo "export DOCKER_TAG=$DOCKER_TAG" >> $BASH_ENV
 
 setup_infra: &setup_infra
-  # decrypt the gcloud secret and set the kubectl context
-  - run: k8/create-gcloud-kubectl-context.sh
-# docker login
-  - run: docker login -u="$DOCKER_USER" -p="$QUAY_TOKEN" quay.io
+  - run: |
+      k8/create-gcloud-kubectl-context.sh
+      docker login -u="$DOCKER_USER" -p="$QUAY_TOKEN" quay.io
 
 jobs:
   build-jar:
