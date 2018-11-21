@@ -77,10 +77,9 @@ jobs:
 
     steps:
       - setup_remote_docker
-      - <<: *exports
       - attach_workspace:
           at: ~/project
-
+      - <<: *exports
       - <<: *setup_infra
 
       # since we made the Dockerfile easy to work with locally with Gradle we need to set the
@@ -103,10 +102,9 @@ jobs:
 
     steps:
       - setup_remote_docker
-      - <<: *exports
       - attach_workspace:
           at: ~/project
-
+      - <<: *exports
       - <<: *setup_infra
 
       # setup final deployment file
