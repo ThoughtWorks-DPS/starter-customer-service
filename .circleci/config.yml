@@ -50,7 +50,7 @@ jobs:
 
   build-docker:
     docker:
-      - image: quay.io/feedyard/circleci-base-agent:latest
+      - image: quay.io/thoughtworks_aelab/di-circleci-platform-agent:latest
         auth:
           username: $DOCKER_USER
           password: $QUAY_TOKEN
@@ -64,6 +64,9 @@ jobs:
       - setup_remote_docker
     # decrypt the gcloud secret and set the kubectl context
       - run: k8/create-kubectl-context.sh
+
+    # install the rest of the gcloud tools (or just kubectl?)
+      - run: gcloud components install alpha --quiet
     # docker login
       - run: docker login -u="$DOCKER_USER" -p="$QUAY_TOKEN" quay.io
 
@@ -74,7 +77,7 @@ jobs:
       - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG .
       - run: docker push quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG
       # setup final deployment file
-      - run: sed 's/\<DOCKER_TAG\>/$DOCKER_TAG/' k8/customerservice.yaml | sed 's/\<VERSION\>/$SERVICE_VERSION/' > k8/customerservice-final.yaml
+      - run: sed "s/\<DOCKER_TAG\>/$DOCKER_TAG/" k8/customerservice.yaml | sed "s/\<VERSION\>/$SERVICE_VERSION/" > k8/customerservice-final.yaml
       - run: cat k8/customerservice-final.yaml
       # deploy
       - run: kubectl apply -f k8/customerservice-final.yaml
