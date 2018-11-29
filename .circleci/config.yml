@@ -12,9 +12,7 @@ defaults: &defaults
 exports: &exports
   - run: |
       SERVICE_VERSION=`grep 'version' gradle.properties|cut -d'=' -f2`
-#      DOCKER_TAG=${SERVICE_VERSION}-${CIRCLE_BUILD_NUM}
       echo "export SERVICE_VERSION=$SERVICE_VERSION" >> $BASH_ENV
-#      echo "export DOCKER_TAG=$DOCKER_TAG" >> $BASH_ENV
 
 setup_infra: &setup_infra
   - run: |
