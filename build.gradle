@@ -25,7 +25,7 @@ group = 'io.twdps.starter'
 sourceCompatibility = 1.8
 
 repositories {
-	mavenLocal()
+//	mavenLocal()
 
 	mavenCentral()
 	maven {
@@ -69,6 +69,7 @@ dependencies {
 	compile 'net.logstash.logback:logstash-logback-encoder:5.1'
 	compile 'io.opentracing.contrib:opentracing-spring-cloud-starter:0.2.1'
 	compile 'io.jaegertracing:jaeger-client:0.32.0'
+	compile 'io.twdps.starter.errors:exceptions:0.5'
 	compile 'io.twdps.starter.errors:error-handling:0.4'
 	compile 'io.twdps.starter.logging:logger:0.5'
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
