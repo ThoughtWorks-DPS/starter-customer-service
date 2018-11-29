@@ -44,9 +44,11 @@ configurations {
 }
 ext.dockerVersion = (project.hasProperty("buildNumber") ? project.version + "-" + buildNumber: "1")
 bootJar {
+
 	baseName = 'customerservice'
 	version =  dockerVersion
 	archiveName = 'customerservice-lastest.jar'
+	requiresUnpack '**/errorhandler-*.jar'
 }
 
 docker {
@@ -65,11 +67,10 @@ dependencies {
 	compile 'io.springfox:springfox-swagger-ui:2.8.0'
 	compile 'org.slf4j:slf4j-api:1.7.25'
 	compile 'net.logstash.logback:logstash-logback-encoder:5.1'
-	compile 'io.opentracing.contrib:opentracing-spring-cloud-starter:0.1.15'
-	compile 'io.jaegertracing:jaeger-client:0.30.4'
-	compile 'io.twdps.starter.errors:error-handling:0.0.2'
-	compile 'io.twdps.starter.errors:exceptions:0.0.2'
-	compile 'io.twdps.starter.logging:logger:0.0.2'
+	compile 'io.opentracing.contrib:opentracing-spring-cloud-starter:0.2.1'
+	compile 'io.jaegertracing:jaeger-client:0.32.0'
+	compile 'io.twdps.starter.errors:error-handling:0.4'
+	compile 'io.twdps.starter.logging:logger:0.5'
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	runtime 'io.micrometer:micrometer-registry-prometheus:1.0.4'
 	testCompile 'org.junit.jupiter:junit-jupiter-api:5.2.0'

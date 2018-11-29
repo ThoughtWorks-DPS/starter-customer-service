@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
-public class WebConfig {
+public class TracerConfig {
 
   private final String serviceName = "custservice";
 
@@ -21,4 +21,5 @@ public class WebConfig {
         .build();
     return tracer;
   }
+
 }
