@@ -25,15 +25,15 @@ group = 'io.twdps.starter'
 sourceCompatibility = 1.8
 
 repositories {
-//	mavenLocal()
+	mavenLocal()
 
 	mavenCentral()
-	maven {
-		url "s3://maven.k8starter.twdps.io/release/"
-		authentication {
-			awsIm(AwsImAuthentication) // load from EC2 role or env var
-		}
-	}
+//	maven {
+//		url "s3://maven.k8starter.twdps.io/release/"
+//		authentication {
+//			awsIm(AwsImAuthentication) // load from EC2 role or env var
+//		}
+//	}
 }
 
 apply plugin: 'io.spring.dependency-management'
@@ -70,7 +70,7 @@ dependencies {
 	compile 'io.opentracing.contrib:opentracing-spring-cloud-starter:0.2.1'
 	compile 'io.jaegertracing:jaeger-client:0.32.0'
 	compile 'io.twdps.starter.errors:exceptions:0.5'
-	compile 'io.twdps.starter.errors:error-handling:0.4'
+	compile 'io.twdps.starter.errors:error-handling:0.8-RELEASE'
 	compile 'io.twdps.starter.logging:logger:0.5'
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	runtime 'io.micrometer:micrometer-registry-prometheus:1.0.4'
