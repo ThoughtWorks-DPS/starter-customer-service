@@ -12,9 +12,9 @@ defaults: &defaults
 exports: &exports
   - run: |
       SERVICE_VERSION=`grep 'version' gradle.properties|cut -d'=' -f2`
-      DOCKER_TAG=${SERVICE_VERSION}-${CIRCLE_BUILD_NUM}
+#      DOCKER_TAG=${SERVICE_VERSION}-${CIRCLE_BUILD_NUM}
       echo "export SERVICE_VERSION=$SERVICE_VERSION" >> $BASH_ENV
-      echo "export DOCKER_TAG=$DOCKER_TAG" >> $BASH_ENV
+#      echo "export DOCKER_TAG=$DOCKER_TAG" >> $BASH_ENV
 
 setup_infra: &setup_infra
   - run: |
@@ -53,7 +53,8 @@ jobs:
 
       # run tests!
       - run: ./gradlew build
-      - run: echo 'export DOCKER_TAG="`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM"' >> $BASH_ENV
+      - run: echo "`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM" >> docker.tag
+
       # since we made the Dockerfile easy to work with locally with Gradle we need to set the
       # JAR_FILE arg in the docker build command
 
@@ -65,6 +66,7 @@ jobs:
             - Dockerfile
             - k8
             - gcloud-secret
+            - docker.tag
 
   build-docker:
     <<: *defaults
@@ -84,6 +86,7 @@ jobs:
 
       # since we made the Dockerfile easy to work with locally with Gradle we need to set the
       # JAR_FILE arg in the docker build command
+      - run: echo "export DOCKER_TAG=`cat docker.tag`" >> $BASH_ENV
       - run: docker build --build-arg JAR_FILE=build/libs/customerservice-lastest.jar -t quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG .
       - run: docker push quay.io/thoughtworks_aelab/customerservice:$DOCKER_TAG
 
@@ -104,8 +107,8 @@ jobs:
       - <<: *setup_infra
 
       # setup final deployment file
-
       - run: |
+          DOCKER_TAG=`cat docker.tag`
           sed "s/{DOCKER_TAG}/$DOCKER_TAG/" k8/customerservice-template.yaml \
           | sed "s/{VERSION}/$SERVICE_VERSION/"  \
           | sed "s/{NAMESPACE}/dev/" > k8/customerservice-final.yaml
