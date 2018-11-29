@@ -28,12 +28,12 @@ repositories {
 	mavenLocal()
 
 	mavenCentral()
-//	maven {
-//		url "s3://maven.k8starter.twdps.io/release/"
-//		authentication {
-//			awsIm(AwsImAuthentication) // load from EC2 role or env var
-//		}
-//	}
+	maven {
+		url "s3://maven.k8starter.twdps.io/release/"
+		authentication {
+			awsIm(AwsImAuthentication) // load from EC2 role or env var
+		}
+	}
 }
 
 apply plugin: 'io.spring.dependency-management'
