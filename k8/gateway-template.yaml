@@ -1,7 +1,8 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: dev-gateway
+  name: customerservice-gateway-{NAMESPACE}
+  namespace: {NAMESPACE}
 spec:
   selector:
     istio: ingressgateway # use istio default controller

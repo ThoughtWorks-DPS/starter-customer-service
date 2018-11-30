@@ -111,8 +111,22 @@ jobs:
           | sed "s/{VERSION}/$SERVICE_VERSION/"  \
           | sed "s/{NAMESPACE}/dev/" > k8/customerservice-final.yaml
       - run: cat k8/customerservice-final.yaml
+      - run: |
+          sed "s/{VERSION}/$SERVICE_VERSION/" k8/gateway-template.yaml \
+                    | sed "s/{NAMESPACE}/dev/" > k8/gateway-final.yaml
+      - run: |
+          sed "s/{VERSION}/$SERVICE_VERSION/" k8/virtualservice-template.yaml \
+                    | sed "s/{NAMESPACE}/dev/" > k8/virtualservice-final.yaml
       # deploy
       - run: kubectl apply -f k8/customerservice-final.yaml
+      # setup gateway
+      - run: kubectl apply -f k8/gateway-final.yaml
+      # setup virtual service
+      - run: kubectl apply -f k8/virtualservice-final.yaml
+      # sleep to let it all happen
+      - run: sleep 60
+      # now we test
+
 
 
 workflows:

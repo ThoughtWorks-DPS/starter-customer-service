@@ -15,7 +15,7 @@ spec:
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: customerservice
+  name: customerservice-v{VERSION}
   namespace: {NAMESPACE}
 spec:
   replicas: 1

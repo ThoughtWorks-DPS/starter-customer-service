@@ -24,3 +24,6 @@
 /dist/
 /nbdist/
 /.nb-gradle/
+
+# ignore the -final files that we might generate testing locally
+*-final.yaml
