@@ -18,8 +18,10 @@ apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'idea'
 apply plugin: 'org.springframework.boot'
-
 apply plugin: 'com.palantir.docker'
+
+apply plugin: 'io.spring.dependency-management'
+//apply plugin: 'org.unbroken-dome.test-sets'
 
 group = 'io.twdps.starter'
 sourceCompatibility = 1.8
@@ -36,12 +38,28 @@ repositories {
 	}
 }
 
-apply plugin: 'io.spring.dependency-management'
-
-configurations {
-	// exclude tomcat
-	compile.exclude module: 'spring-boot-starter-tomcat'
+//Configures the classpath and the source and resource directories
+//of the integrationTest task.
+sourceSets {
+	//Declaring this source set creates compile time and runtime configurations for it.
+	integrationTest {
+		java {
+			compileClasspath += main.output + test.output
+			runtimeClasspath += main.output + test.output
+			srcDir file('src/integration-test/java')
+		}
+		resources.srcDir file('src/integration-test/resources')
+	}
 }
+
+//Configures the compile and runtime configurations for our integration tests
+//and includes the dependencies of the test task.
+configurations {
+	integrationTestCompile.extendsFrom testCompile
+	integrationTestRuntime.extendsFrom testRuntime
+}
+
+
 ext.dockerVersion = (project.hasProperty("buildNumber") ? project.version + "-" + buildNumber: "1")
 bootJar {
 
@@ -61,7 +79,7 @@ docker {
 dependencies {
 	implementation('org.springframework.boot:spring-boot-starter-actuator')
 	implementation('org.springframework.boot:spring-boot-starter-webflux')
-	compile 'org.springframework.boot:spring-boot-starter-undertow'
+//	compile 'org.springframework.boot:spring-boot-starter-undertow'
 	compileOnly 'org.projectlombok:lombok:1.18.0'
 	compile 'io.springfox:springfox-swagger2:2.8.0'
 	compile 'io.springfox:springfox-swagger-ui:2.8.0'
@@ -78,11 +96,35 @@ dependencies {
 	testCompile 'org.mockito:mockito-core:2.19.1'
 	testCompile 'org.mockito:mockito-junit-jupiter:2.19.1'
 	testCompile 'org.springframework.boot:spring-boot-starter-test'
-	testCompile 'io.rest-assured:rest-assured:3.1.0'
+	testCompile 'io.rest-assured:rest-assured:3.2.0'
+	testCompile 'io.rest-assured:spring-mock-mvc:3.20'
+	testCompile 'io.rest-assured:spring-web-test-client:3.2.0'
 	testCompile 'io.projectreactor:reactor-test'
 	testRuntime 'org.junit.jupiter:junit-jupiter-engine:5.2.0'
+	integrationTestCompile 'io.rest-assured:rest-assured:3.2.0'
 }
+
+//Create the task that runs the integration tests found from the
+//configured source directory and uses the correct classpath.
+task integrationTest(type: Test) {
+	useJUnitPlatform() //use for jUnit5
+	testClassesDirs = sourceSets.integrationTest.output.classesDirs
+	classpath = sourceSets.integrationTest.runtimeClasspath
+	outputs.upToDateWhen { false } //assure they are run even when the code hasn't changed
+	//assure that the gradle wrapper passes command line system properties to the tests
+	systemProperties System.properties
+}
+//Ensure that the check task fails the build if there are failing integration tests.
+check.dependsOn integrationTest
+//Ensure that our unit tests are run before our integration tests
+integrationTest.mustRunAfter test
 
 processResources {
 	expand(project.properties)
 }
+
+test {
+	useJUnitPlatform()
+}
+
+
