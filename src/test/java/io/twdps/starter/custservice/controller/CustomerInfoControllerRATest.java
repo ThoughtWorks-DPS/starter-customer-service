@@ -5,12 +5,9 @@ import io.twdps.starter.custservice.repository.CustomerInfoRepository;
 import io.twdps.starter.custservice.service.CustomerInfoService;
 import io.twdps.starter.custservice.vo.CustomerInfo;
 import io.twdps.starter.errors.exceptions.ResourceNotFoundException;
-import junit.framework.AssertionFailedError;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.api.extension.ExtensionContext;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -21,9 +18,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
-import static io.restassured.module.webtestclient.RestAssuredWebTestClient.given;
 import static org.hamcrest.Matchers.equalTo;
 
 @ExtendWith(SpringExtension.class)

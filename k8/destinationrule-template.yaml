@@ -1,0 +1,17 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{SERVICE_NAME}}
+  namespace: {{NAMESPACE}}
+spec:
+  host: {{SERVICE_NAME}}.{{NAMESPACE}}.svc.cluster.local
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_CONN
+  subsets:
+  - name: LATEST
+    labels:
+      version: {{CURRENT_VERSION}} # this is the the SWITCH - as we 'release' a version we set this here
+  - name: {{NEW_SUBSET}}
+    labels:
+      version: {{NEW_VERSION}} #as we're thinking about testing a new version we set this here - until released

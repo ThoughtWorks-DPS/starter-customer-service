@@ -1,0 +1,15 @@
+# label of status: released' indicates the version that's considered released in
+# that namespace
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{SERVICE_NAME}}
+  namespace: {{NAMESPACE}}
+  labels:
+    app: {{SERVICE_NAME}}
+spec:
+  ports:
+  - port: 8082
+    name: http
+  selector:
+    app: {{SERVICE_NAME}}

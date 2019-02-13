@@ -11,8 +11,8 @@ defaults: &defaults
     GKE_CLUSTER_NAME: k8startercluster
 exports: &exports
   - run: |
-      SERVICE_VERSION=`grep 'version' gradle.properties|cut -d'=' -f2`
-      echo "export SERVICE_VERSION=$SERVICE_VERSION" >> $BASH_ENV
+      NEW_VERSION=`grep 'version' gradle.properties|cut -d'=' -f2`
+      echo "export NEW_VERSION=$NEW_VERSION" >> $BASH_ENV
 
 setup_infra: &setup_infra
   - run: |
@@ -49,8 +49,9 @@ jobs:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
-      # run tests!
-      - run: ./gradlew build
+      # run tests - but not Integration Testing - that's post release
+      - run: ./gradlew build test -x integrationTest
+      # CREATE THE DOCKER TAG which for now is the new version
       - run: echo "`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM" >> docker.tag
 
       # since we made the Dockerfile easy to work with locally with Gradle we need to set the
@@ -104,21 +105,47 @@ jobs:
       - <<: *exports
       - <<: *setup_infra
 
-      # setup final deployment file
+      # setup the deployment variables
       - run: |
-          DOCKER_TAG=`cat docker.tag`
-          sed "s/{DOCKER_TAG}/$DOCKER_TAG/" k8/customerservice-template.yaml \
-          | sed "s/{VERSION}/$SERVICE_VERSION/"  \
-          | sed "s/{NAMESPACE}/dev/" > k8/customerservice-final.yaml
-      - run: cat k8/customerservice-final.yaml
+          echo "SERVICE_NAME=customerservice" >> k8-dev.env
+          echo "NAMESPACE=dev" >> k8-dev.env
+          echo "DOCKER_TAG=$DOCKER_TAG" >> k8-dev.env
+          echo "CURRENT_VERSION=$DOCKER_TAG" >> k8-dev.env
+          LATEST_VERSION=`kubectl get deployments -n dev -l status=released -o jsonpath='{.items[0].metadata.labels.version}'`
+          echo "LATEST_VERSION=$LATEST_VERSION" >> k8-dev.env
+          CURRENT_SUBSET=${LATEST_VERSION//\./-}
+          echo "CURRENT_SUBSET=$CURRENT_SUBSET" >> k8-dev.env
+          echo "NEW_VERSION=$DOCKER_TAG" >> k8-dev.env
+          NEW_SUBSET=${NEW_VERSION//\./-}
+          echo "NEW_SUBSET=$NEW_SUBSET" >> k8-dev.env
+          echo "BASE_WEIGHT=75" >> k8-dev.env
+          echo "CANARY_WEIGHT=25" >> k8-dev.env
+
+      # create deployment files
+
+
+      - run: j2 destinationrule-template.yaml k8-dev.env >> destinationrule-LATEST.yaml
+
+      - run: j2 virtualservice-header-based-vs-template.yaml k8-dev.env >> virtual-service-header.yaml
+
+      - run: j2 deployment-template.yaml k8-dev.env > deployment-$CURRENT_VERSION.yaml
+
+      # now we have the files we need to deploy the new rules and then the container
+      # first release the service to make sure it's there
+      - run: kubectl apply -f service.yaml
+
       - run: |
-          sed "s/{VERSION}/$SERVICE_VERSION/" k8/gateway-template.yaml \
-                    | sed "s/{NAMESPACE}/dev/" > k8/gateway-final.yaml
+          kubectl apply -f destinationrule-LATEST.yaml
+          sleep 5
+
       - run: |
-          sed "s/{VERSION}/$SERVICE_VERSION/" k8/virtualservice-template.yaml \
-                    | sed "s/{NAMESPACE}/dev/" > k8/virtualservice-final.yaml
-      # deploy
-      - run: kubectl apply -f k8/customerservice-final.yaml
+          kubectl apply -f virtual-service-header.yaml
+          sleep 5
+
+      - run: |
+        # now we need a script to check on pod status before going on
+          kubectl apply -f deployment-$CURRENT_VERSION.yaml
+
       # setup gateway
       - run: kubectl apply -f k8/gateway-final.yaml
       # setup virtual service
@@ -127,17 +154,15 @@ jobs:
       - run: sleep 60
       # now we test
 
-
-
 workflows:
   version: 2
 
   btd:
     jobs:
-      - build-jar
-      - build-docker:
-          requires:
-            - build-jar
-      - deploy-service:
-          requires:
-            - build-docker
+#      - build-jar
+#      - build-docker:
+#          requires:
+#            - build-jar
+#      - deploy-service:
+#          requires:
+#            - build-docker

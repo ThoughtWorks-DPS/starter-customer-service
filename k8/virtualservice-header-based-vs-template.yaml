@@ -1,11 +1,7 @@
-# Default base VirtualService
-# Does not setup alternate routing rules for versions or headers
-# it does however setup a new VS in the right namespace as the service
-# moves from {NAMESPACE} -> test -> prod
-# Canary VirtualService
+# Header based testing VirtualService
 # Sets up a weight for the canary releases
 # it does however setup a new VS in the right namespace as the service
-# moves from {NAMESPACE} -> test -> prod
+# moves from dev -> test -> prod
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -18,10 +14,18 @@ spec:
   - {{SERVICE_NAME}}-gateway
   - mesh
   http:
+  - match:
+    - headers:
+        x-test:
+          exact: {{NEW_VERSION}}
+    route:
+    - destination:
+        host: {{SERVICE_NAME}}
+        subset: {{NEW_SUBSET}}
   - route:
     - destination:
         host: {{SERVICE_NAME}}
-        subset: LATEST # change the destination rule to change what 'version' LATEST is pointing too
+        subset: LATEST
     timeout: 2s # initial timeout before declaring a 503 or triggering an initial retry
     retries: # example setup for retries and timeout that triggers a new retry
       attempts: 3

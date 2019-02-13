@@ -9,18 +9,18 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{SERVICE_NAME}}-virtualservice
-  namespace: {{NAMESPACE}}
+  name: customerservice-virtualservice
+  namespace: dev
 spec:
   hosts:
-  - "{{SERVICE_NAME}}.{{NAMESPACE}}.start.twdps.io"
+  - "customerservice.dev.start.twdps.io"
   gateways:
-  - {{SERVICE_NAME}}-gateway
+  - customerservice-gateway
   - mesh
   http:
   - route:
     - destination:
-        host: {{SERVICE_NAME}}
+        host: customerservice
         subset: LATEST # change the destination rule to change what 'version' LATEST is pointing too
     timeout: 2s # initial timeout before declaring a 503 or triggering an initial retry
     retries: # example setup for retries and timeout that triggers a new retry
