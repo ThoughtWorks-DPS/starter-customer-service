@@ -105,7 +105,6 @@ dependencies {
 //Create the task that runs the integration tests found from the
 //configured source directory and uses the correct classpath.
 task integrationTest(type: Test) {
-	useJUnitPlatform() //use for jUnit5
 	testClassesDirs = sourceSets.integrationTest.output.classesDirs
 	classpath = sourceSets.integrationTest.runtimeClasspath
 	outputs.upToDateWhen { false } //assure they are run even when the code hasn't changed
@@ -120,7 +119,7 @@ processResources {
 	expand(project.properties)
 }
 
-test {
+tasks.withType(Test) {
 	useJUnitPlatform()
 }
 
