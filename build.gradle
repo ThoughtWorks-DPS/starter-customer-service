@@ -59,12 +59,11 @@ configurations {
 	integrationTestRuntime.extendsFrom testRuntime
 }
 
+ext.dockerImageTag = (project.hasProperty("buildNumber") ? project.version + "-" + buildNumber: "1")
 
-ext.dockerVersion = (project.hasProperty("buildNumber") ? project.version + "-" + buildNumber: "1")
 bootJar {
-
 	baseName = 'customerservice'
-	version =  dockerVersion
+	version =  dockerImageTag
 	archiveName = 'customerservice-lastest.jar'
 	requiresUnpack '**/errorhandler-*.jar'
 }
