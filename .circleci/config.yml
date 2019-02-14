@@ -42,8 +42,7 @@ jobs:
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      # run tests - but not Integration Testing - that's post release
-      - run: ./gradlew build test -x integrationTest
+      - run: ./gradlew build check
 
       - save_cache:
           paths:
