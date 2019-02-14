@@ -47,7 +47,8 @@ jobs:
 
       - save_cache:
           paths:
-            - ~/.gradle
+            - ~/.gradle/caches
+            - ~/.gradle/wrapper
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
       # CREATE THE DOCKER TAG which for now is the new version
