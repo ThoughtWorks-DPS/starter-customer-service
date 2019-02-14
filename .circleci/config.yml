@@ -35,22 +35,21 @@ jobs:
       # IMPORTANT - circleci needs the AWS credentials setup correctly
       # with a user that can access the s3 bucket used for the maven dependencies
 
-      # Download and cache dependencies
+      # Restore dependencies if we can
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "build.gradle" }}
           # fallback to using the latest cache if no exact match is found
           - v1-dependencies-
 
-      - run: ./gradlew dependencies
+      # run tests - but not Integration Testing - that's post release
+      - run: ./gradlew build test -x integrationTest
 
       - save_cache:
           paths:
             - ~/.gradle
           key: v1-dependencies-{{ checksum "build.gradle" }}
 
-      # run tests - but not Integration Testing - that's post release
-      - run: ./gradlew build test -x integrationTest
       # CREATE THE DOCKER TAG which for now is the new version
       - run: echo "`grep 'version' gradle.properties|cut -d'=' -f2`-$CIRCLE_BUILD_NUM" >> docker.tag
 
