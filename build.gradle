@@ -55,8 +55,8 @@ sourceSets {
 //Configures the compile and runtime configurations for our integration tests
 //and includes the dependencies of the test task.
 configurations {
-	integrationTestCompile.extendsFrom testCompile
-	integrationTestRuntime.extendsFrom testRuntime
+	integrationTestImplementation.extendsFrom testImplementation
+	integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
 
 ext.dockerImageTag = (project.hasProperty("buildNumber") ? project.version + "-" + buildNumber: "1")
